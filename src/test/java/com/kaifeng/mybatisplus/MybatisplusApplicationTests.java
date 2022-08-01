@@ -1,7 +1,10 @@
 package com.kaifeng.mybatisplus;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.kaifeng.mybatisplus.mapper.UserMapper;
 import com.kaifeng.mybatisplus.pojo.User;
 import com.kaifeng.mybatisplus.service.UserService;
@@ -126,6 +129,45 @@ class MybatisplusApplicationTests {
         UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
         userUpdateWrapper.like("name", "小").set("name", "小黑");
         System.out.println(userMapper.update(null, userUpdateWrapper));
+    }
+
+    @Test
+    public void concatCondition(){
+        String username = "a";
+        Integer ageBegin = 20;
+        Integer ageEnd = 30;
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like(StringUtils.isNotBlank(username), "name", username)
+                .gt(ageBegin != null, "age", ageBegin)
+                .lt(ageEnd != null, "age", ageEnd);
+        userMapper.selectList(queryWrapper).forEach(System.out::println);
+
+    }
+
+    @Test
+    public void test6(){
+        String username = "e";
+        Integer ageBegin = 20;
+        Integer ageEnd = 30;
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.like(StringUtils.isNotBlank(username), User::getName, username)
+                .gt(ageBegin != null, User::getAge, ageBegin)
+                .lt(ageEnd != null, User::getAge, ageEnd);
+        userMapper.selectList(userLambdaQueryWrapper).forEach(System.out::println);
+    }
+
+
+    @Test
+    public void test7(){
+        String username = "小";
+        Integer ageBegin = 18;
+        Integer ageEnd = 30;
+        LambdaUpdateWrapper<User> userLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+        userLambdaUpdateWrapper.like(StringUtils.isNotBlank(username), User::getName, username)
+                .gt(ageBegin != null, User::getAge, ageBegin)
+                .lt(ageEnd != null, User::getAge, ageEnd)
+                .set(User::getName, "小白").set(User::getEmail, "1234@tets.com");
+        System.out.println(userMapper.update(null, userLambdaUpdateWrapper));
     }
 
 }
